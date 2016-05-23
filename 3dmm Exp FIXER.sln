@@ -1,21 +1,19 @@
-Microsoft Visual Studio Solution File, Format Version 7.00
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3dmm Exp FIXER", "3dmm Exp FIXER.vcproj", "{EA7D3C9A-AA98-43D8-85CF-DECD6C5466D0}"
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3dmm Exp FIXER", "3dmm Exp FIXER.vcxproj", "{EA7D3C9A-AA98-43D8-85CF-DECD6C5466D0}"
 EndProject
 Global
-	GlobalSection(SolutionConfiguration) = preSolution
-		ConfigName.0 = Debug
-		ConfigName.1 = Release
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
 	EndGlobalSection
-	GlobalSection(ProjectDependencies) = postSolution
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EA7D3C9A-AA98-43D8-85CF-DECD6C5466D0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{EA7D3C9A-AA98-43D8-85CF-DECD6C5466D0}.Debug|Win32.Build.0 = Debug|Win32
+		{EA7D3C9A-AA98-43D8-85CF-DECD6C5466D0}.Release|Win32.ActiveCfg = Release|Win32
+		{EA7D3C9A-AA98-43D8-85CF-DECD6C5466D0}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
-	GlobalSection(ProjectConfiguration) = postSolution
-		{EA7D3C9A-AA98-43D8-85CF-DECD6C5466D0}.Debug.ActiveCfg = Debug|Win32
-		{EA7D3C9A-AA98-43D8-85CF-DECD6C5466D0}.Debug.Build.0 = Debug|Win32
-		{EA7D3C9A-AA98-43D8-85CF-DECD6C5466D0}.Release.ActiveCfg = Release|Win32
-		{EA7D3C9A-AA98-43D8-85CF-DECD6C5466D0}.Release.Build.0 = Release|Win32
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-	EndGlobalSection
-	GlobalSection(ExtensibilityAddIns) = postSolution
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

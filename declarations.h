@@ -1,10 +1,6 @@
-#include <shlwapi.h>
 
-#include <windows.h>
+#define MAX_PATH 260
 
-#include <commctrl.h>
-#include <stdio.h>
-#include "resource.h"
 
 struct DirectoryIndexQuad
 {
@@ -19,8 +15,6 @@ struct Quad
 	unsigned long toProd;
 };
 
-DWORD APIENTRY MyThreadProc(void *pData);
-
 int FixFile();
 int FixGGFR(unsigned long SectionOffset, unsigned long SectionLength, FILE *buffer);
 int FixACTR(unsigned long SectionOffset, unsigned long SectionLength, FILE *buffer);
@@ -28,4 +22,3 @@ int FixGGAE(unsigned long SectionOffset, unsigned long SectionLength, FILE *buff
 int FixTDT(unsigned long SectionOffset, unsigned long SectionLength, FILE *buffer);
 bool VerifyQuad(char Quad[4],unsigned long ID,unsigned long *retQuadsArrNum);
 
-LRESULT CALLBACK MainDlgProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);

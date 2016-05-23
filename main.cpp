@@ -1,53 +1,32 @@
+#include <stdio.h>
+#include <string.h>
+
 #include "declarations.h"
 
-char *szFilePath;
-char *szFileTitle1;
+char *szFileTitle;
 
 unsigned long numListQuads = 0;
 unsigned long numFixed = 0;
 Quad* Quads;
-char szAppPath[MAX_PATH];
-char szDataFilePath[MAX_PATH];
 
 char szFileName[MAX_PATH] = "";
-char szFileTitle[MAX_PATH] = "";
 
-bool done = FALSE;
+bool done = 0;
 
-HANDLE hThread;
+int main(int argc, char **argv){
 
-HWND hDialog = NULL;
-
-INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
-	//INITCOMMONCONTROLSEX InitCtrlEx;
-
-	//InitCtrlEx.dwSize = sizeof(INITCOMMONCONTROLSEX);
-	//InitCtrlEx.dwICC  = ICC_PROGRESS_CLASS;
-	//InitCommonControlsEx(&InitCtrlEx);
-
-	// GET PATH TO APP DIRECTORY
-	GetModuleFileName(GetModuleHandle(NULL), szAppPath, MAX_PATH);
-	
-	size_t pathSize = strlen(szAppPath);
-	for (size_t strX = pathSize - 1;szAppPath[strX] != '\\';strX--)
-	{
-		szAppPath[strX] = NULL;
+	if(argc!=2){
+		fprintf(stderr,"usage: %s <file.3mm>\n");
+		return -1;
 	}
-
-
-
-
 
 	//OPEN AND SCAN DATA FILE
 	FILE *liststream;
-	
-	sprintf(szDataFilePath,"%s%s",szAppPath,"fix.dat"); //MAKE FULL DATA FILE PATH
 
 	//MessageBox(NULL, szDataFilePath, "AAA", MB_OK);
-	if( (liststream  = fopen(szDataFilePath, "r" )) == NULL)//Double check if file exists or there is some other error
+	if( (liststream  = fopen("fix.dat", "r" )) == NULL)//Double check if file exists or there is some other error
 	{
-		MessageBox(NULL,"Cannot open fix data file","Error",MB_OK | MB_ICONHAND);
+		fprintf(stderr,"Cannot open fix data file\n");
 		return 1; //File Error Code
 	}
 	char buffer[255];
@@ -71,143 +50,33 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	curQuad++;
 	}
 	fclose(liststream);
-	//IF COMMAND LINE HAS A " IN IT THEN SKIP THE OPEN DIALOG BOX AND USE THE INFO IN THE PATH
-	if (lpCmdLine[0] != '\"')
-	{
 
-		//Get user to select path
-		OPENFILENAME ofn;
-		
-
-		ZeroMemory(&ofn, sizeof(ofn));
-
-		ofn.lStructSize = sizeof(ofn);
-		ofn.hwndOwner = NULL;
-		ofn.lpstrFilter = "3D Movies (*.3mm)\0*.3mm\0";
-		ofn.lpstrFile = szFileName;
-		ofn.lpstrFileTitle = szFileTitle;
-		ofn.nMaxFile = MAX_PATH;
-		ofn.nMaxFileTitle = MAX_PATH;
-		//ofn.lpstrInitialDir = szMSKIDSPath;
-		ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-		ofn.lpstrDefExt = "";
-		ofn.lpstrTitle = "Open 3DMM File";
-		
-		//Show open dialog end prog if cancel is selected
-		if(GetOpenFileName(&ofn))
-		{
-			szFileTitle1 = ofn.lpstrFileTitle;
-			szFilePath = ofn.lpstrFile;
-		}
-		else
-		{
-			//MessageBox(NULL,"Cancel!","Cancel",MB_OK | MB_ICONEXCLAMATION);
-			return 0;
-		}
-			
-	}
-	else
-	{
-		//ZeroMemory(szFileName,MAX_PATH);
-		int curSpot = 0;
-		for (int strX = 1;lpCmdLine[strX] != '\"';strX++)
-		{
-			szFileName[curSpot] = lpCmdLine[strX];
-			curSpot++;
-		}
-		//MessageBox(NULL,path,path,MB_OK);
-		strcpy(szFileTitle,szFileName);
-		szFileTitle1 = strrchr(szFileTitle, '\\') + 1;
-		//MessageBox(NULL,szFileTitle,"",MB_OK);
-		szFilePath = szFileName;
-		//MessageBox(NULL,szFilePath,szFilePath,MB_OK);
-	}
-		//MessageBox(NULL,"WHY??","??",MB_OK);
-		
-		DialogBox(hInstance, MAKEINTRESOURCE(IDD_MAIN), NULL, (DLGPROC)MainDlgProc);
-
-		
-		return 0;
-}
-
-LRESULT CALLBACK MainDlgProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
-
-	switch(Msg)
-	{
-	case WM_INITDIALOG:
-		{
-		
-		char szMainTitle[] = "3D Movie Expansion Fixer - ";
-		char szTitle[255];
-		wsprintf(szTitle,"%s%s",szMainTitle,szFileTitle1);
-
-		//HWND hProgress;
-		//GetDlgItem(hWnd,IDC_PROGRESS1);
-
-
-		SetWindowText(hWnd,szTitle);
-		//free(szTitle);
-		
-		hDialog = hWnd;
-		//MessageBox(NULL,szFilePath,szFilePath,MB_OK);
-		DWORD threadid;
-
-		hThread = CreateThread(0, 0, MyThreadProc, 0, 0, &threadid);
-		
-		
-
-		break;
-		}
-	case WM_PAINT:
-		break;
-	case WM_CLOSE:
-
-		break;
-	case WM_QUIT:
-		
-		break;
-	}
-	return FALSE;
-}
-
-DWORD APIENTRY MyThreadProc(void *pData)
-{
-	//MessageBox(NULL,szFilePath,szFilePath,MB_OK);
-	while(hDialog == NULL)
-	{
-		//MessageBox(NULL,szFilePath,szFilePath,MB_OK);
-	}
 	
-	switch (FixFile())
-	{
-	case 0:
-		char szBuff[300];
-		sprintf(szBuff,"Fix Complete\n\nFile: %s\nNumber of problems found and fixed: %d",szFileTitle1,numFixed);
-		MessageBox(hDialog,szBuff,"3D Movie Expansion Fixer", MB_OK | MB_ICONINFORMATION);
-		CloseHandle(hThread);
-		EndDialog(hDialog,0);
+	strcpy(szFileName,argv[1]);
+	szFileTitle = strrchr(szFileName, '\\') + 1;
+	
 
-		break;
-	case 1:
-		MessageBox(hDialog,"Cannot open 3DMM file. Make sure the file is not already open and is not read only.","Error",MB_OK | MB_ICONHAND);
-		CloseHandle(hThread);
-		EndDialog(hDialog,0);
-		break;
-	case 2:
-		MessageBox(hDialog,"Not a valid 3DMM file","Error",MB_OK | MB_ICONHAND);
-		CloseHandle(hThread);
-		EndDialog(hDialog,0);
-		break;
+	switch (FixFile()){
+		case 0:
+			fprintf(stderr,"Fix Complete\n\nFile: %s\nNumber of problems found and fixed: %d\n",szFileTitle,numFixed);
+			return 0;
+		case 1:
+			fprintf(stderr,"Cannot open 3DMM file. Make sure the file is not already open and is not read only.\n");
+			return 2;
+			break;
+		case 2:
+			fprintf(stderr,"Not a valid 3DMM file\n");
+			return 3;
 	}
-	return 0;
+	return 4;
 }
 
-int FixFile()
-{
+
+
+int FixFile(){
 	FILE *stream3dmm;
 	//MessageBox(NULL,szFilePath,szFilePath,MB_OK);
-	if( (stream3dmm  = fopen( szFilePath, "r+b" )) == NULL )//Double check if file exists or there is some other error
+	if( (stream3dmm  = fopen( szFileName, "r+b" )) == NULL )//Double check if file exists or there is some other error
 	{
 		return 1; //File Error Code
 	}
@@ -235,8 +104,6 @@ int FixFile()
 	//sprintf(cool,"%d",numquads);
 	//MessageBox(hDialog,cool,cool,MB_OK);
 
-	SendDlgItemMessage(hDialog,IDC_PROGRESS1, PBM_SETRANGE32, 0, numquads);
-	SendDlgItemMessage(hDialog,IDC_PROGRESS1, PBM_SETSTEP, 1,0); 
 
 
 	DirectoryIndexQuad* dmmDirectory;
@@ -248,7 +115,7 @@ int FixFile()
 		fread(&dmmDirectory[x].length,1,4,stream3dmm);	
 	}
 
-	for (x = 0; x <= numquads - 1; x++)
+	for (unsigned long x = 0; x <= numquads - 1; x++)
 	{
 		fseek(stream3dmm,indxoffset + 20 + dmmDirectory[x].offset,0);
 		char QUAD[4];
@@ -289,7 +156,6 @@ int FixFile()
 		{
 			FixTDT(SectionOffset,SectionSize,stream3dmm);
 		}
-		SendDlgItemMessage(hDialog,IDC_PROGRESS1, PBM_STEPIT, 0,0);
 	}
 
 
@@ -320,7 +186,7 @@ int FixGGAE(unsigned long SectionOffset, unsigned long SectionLength, FILE *buff
 
 	}
 
-	for (x = 0; x <= num - 1; x++)
+	for (unsigned long x = 0; x <= num - 1; x++)
 	{
 		//SEEK TO BEGINNING OF SECTION
 		fseek(buffer,SectionOffset + 20 + dmmDirectory[x].offset,0);
@@ -371,7 +237,7 @@ int FixGGAE(unsigned long SectionOffset, unsigned long SectionLength, FILE *buff
 
 			if (!fwrite(&Quads[QuadsNum].toProd,1,4,buffer))
 			{
-				MessageBox(NULL,"??","??",MB_OK);
+				fprintf(stderr,"Failed to write GGAE quads (WORD TEXTURES)\n");
 			}
 			numFixed++;
 			
@@ -414,7 +280,7 @@ int FixGGAE(unsigned long SectionOffset, unsigned long SectionLength, FILE *buff
 
 			if (!fwrite(&Quads[QuadsNum].toProd,1,4,buffer))
 			{
-				MessageBox(NULL,"??","??",MB_OK);
+				fprintf(stderr,"Failed to write GGAE quads (ACTOR SOUNDS)\n");
 			}
 			numFixed++;
 			
@@ -426,7 +292,7 @@ int FixGGAE(unsigned long SectionOffset, unsigned long SectionLength, FILE *buff
 	}
 
 	//MessageBox(NULL,"AA","AA",MB_OK);
-	free(dmmDirectory);
+	delete [] dmmDirectory;
 	return 0;
 }
 int FixGGFR(unsigned long SectionOffset, unsigned long SectionLength, FILE *buffer)
@@ -452,7 +318,7 @@ int FixGGFR(unsigned long SectionOffset, unsigned long SectionLength, FILE *buff
 		fread(&dmmDirectory[x].length,1,4,buffer);
 
 	}
-	for (x = 0; x <= num - 1; x++)
+	for (unsigned long x = 0; x <= num - 1; x++)
 	{
 		//SEEK TO BEGINNING OF SECTION SKIPPING FRAME NUMBER with + 4
 		fseek(buffer,SectionOffset + 20 + dmmDirectory[x].offset + 4,0);
@@ -488,7 +354,7 @@ int FixGGFR(unsigned long SectionOffset, unsigned long SectionLength, FILE *buff
 			
 			if (!fwrite(&Quads[QuadsNum].toProd,1,4,buffer))
 			{
-				MessageBox(NULL,"??","??",MB_OK);
+				fprintf(stderr,"Failed to write GGFR quads (SOUND)\n");
 			}
 			numFixed++;
 			
@@ -525,7 +391,7 @@ int FixGGFR(unsigned long SectionOffset, unsigned long SectionLength, FILE *buff
 
 			if (!fwrite(&Quads[QuadsNum].toProd,1,4,buffer))
 			{
-				MessageBox(NULL,"??","??",MB_OK);
+				fprintf(stderr,"Failed to write GGFR quads (SCENES)\n");
 			}
 			numFixed++;
 
@@ -535,7 +401,7 @@ int FixGGFR(unsigned long SectionOffset, unsigned long SectionLength, FILE *buff
 	}
 
 	//MessageBox(NULL,"AA","AA",MB_OK);
-	free(dmmDirectory);
+	delete [] dmmDirectory;
 	return 0;
 }
 int FixACTR(unsigned long SectionOffset, unsigned long SectionLength, FILE *buffer)
@@ -570,7 +436,7 @@ int FixACTR(unsigned long SectionOffset, unsigned long SectionLength, FILE *buff
 
 			if (!fwrite(&Quads[QuadsNum].toProd,1,4,buffer))
 			{
-				MessageBox(NULL,"??","??",MB_OK);
+				fprintf(stderr,"Failed to write ACTR quads (SOUND)\n");
 			}
 			numFixed++;
 	return 0;
@@ -601,7 +467,7 @@ int FixTDT(unsigned long SectionOffset, unsigned long SectionLength, FILE *buffe
 
 			if (!fwrite(&Quads[QuadsNum].toProd,1,4,buffer))
 			{
-				MessageBox(NULL,"??","??",MB_OK);
+				fprintf(stderr,"Failed to write TDT quads (SOUND)\n");
 			}
 			numFixed++;
 
@@ -615,8 +481,8 @@ bool VerifyQuad(char Quad[4],unsigned long ID,unsigned long *retQuadsArrNum)
 		{
 			*retQuadsArrNum = curQuad;
 			//MessageBox (NULL,"LOOKIE!","FDSA",MB_OK);
-			return TRUE;
+			return 1;
 		}
 	}
-	return FALSE;
+	return 0;
 }
